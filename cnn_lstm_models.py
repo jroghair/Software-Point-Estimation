@@ -40,7 +40,7 @@ drive = GoogleDrive(gauth)
 # Download a file based on its file ID.
 #
 # A file ID looks like: laggVyWshwcyP6kEI-y_W3P8D26sz
-file_id = '1FTXrKknj21DsW7KTmSPO5cQI1MAzPYMJ'
+
 downloaded = drive.CreateFile({'id': file_id})
 downloaded.GetContentFile('clean_moodle.csv')  
 df = pd.read_csv('moodle.csv')
