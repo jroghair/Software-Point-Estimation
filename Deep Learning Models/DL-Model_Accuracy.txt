@@ -1,3 +1,4 @@
+#dataset // model // loss //accuracy
 clean_appceleratorstudio.csv Basic-CNN-Model 1.017815244252279 0.70319635
 clean_appceleratorstudio.csv LSTM-Attention 1.5661785526362728 0.65753424
 clean_aptanastudio.csv Basic-CNN-Model 0.7530226635645672 0.7550201
