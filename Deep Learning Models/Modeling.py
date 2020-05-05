@@ -84,14 +84,15 @@ for filename in os.listdir(clean_directory):
     
     
 
-#create glove embeddings    
+#create glove embeddings from pretrained glove word2vec representations trained on wikipedia
+#download file here: http://nlp.stanford.edu/data/glove.6B.zip
 def load_glove_index():
     EMBEDDING_FILE = base_directory + 'glove.6B.300d.txt'
     def get_coefs(word,*arr): return word, np.asarray(arr, dtype='float32')[:300]
     embeddings_index = dict(get_coefs(*o.split(" ")) for o in open(EMBEDDING_FILE, encoding="utf8"))
     return embeddings_index
    
-#Create glove embedding matrix for convolutional operations    
+#Create glove embedding matrix for convolutional operations for each word in our vocab list and glove pretrained words to create a 2-d matrix    
 def create_glove(word_index,embeddings_index):
     emb_mean,emb_std = -0.005838499,0.48782197
     all_embs = np.stack(embeddings_index.values())
