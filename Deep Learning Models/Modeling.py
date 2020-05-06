@@ -24,10 +24,12 @@ import os
 from sklearn.preprocessing import LabelBinarizer
 import math
 
-os.chdir('C:\\Users\\jrogh\\OneDrive\\Documents\\665A\\Project')
-base_directory = 'C:\\Users\\jrogh\\OneDrive\\Documents\\665A\\Project\\'
-directory = 'C:\\Users\\jrogh\\OneDrive\\Documents\\665A\\Project\\Data'
-clean_directory = 'C:\\Users\\jrogh\\OneDrive\\Documents\\665A\\Project\\Clean_data'
+cwd = os.getcwd()
+os.chdir(cwd)
+base_directory = cwd
+print(base_directory)
+directory = cwd + '\\Data'
+clean_directory = cwd + '\\Clean_data'
 
 
 #preprocessing
@@ -37,62 +39,15 @@ maxlen = 35
 tokenizer = Tokenizer(num_words= vocab_size)
 lb = LabelBinarizer() #for one-hot encoding of response
 
-#Setup Embedding matrix
-glove_embedding_index = load_glove_index()
 
-#Iterate through datasets applying CNN and Attention models
-for filename in os.listdir(clean_directory):
-    print(filename)
-    df = pd.read_csv(clean_directory + "\\" + filename)
-    data = df.reset_index()[['description', 'storypoint']]
-    
-    data.loc[(data.storypoint <= 4), 'storypoints_mod'] = 'low'
-    data.loc[(data.storypoint >13), 'storypoints_mod'] = 'high'
-    data.loc[((data.storypoint <=13) & (data.storypoint > 4)), 'storypoints_mod'] = 'medium'
-    data['sp'] = lb.fit_transform(data['storypoints_mod']).tolist()
-    data = data[['description', 'sp']]
-    enc = [data['sp'][i].index(1) for i in range(df.shape[0])]
-    enc = np.asarray(enc)
-    
-    #data setup
-    tokenizer.fit_on_texts(df['description'].astype(str)) #index of words with length vocab size, ordered in length of frequency
-    sequences = tokenizer.texts_to_sequences(df['description'].astype(str))
-    data_sq = pad_sequences(sequences, maxlen=maxlen)
-    
-    split = 0.7
-    x_dim = data_sq.shape
-    x_train, x_test = data_sq[:math.floor(x_dim[0]*0.7),:], data_sq[math.floor(x_dim[0]*0.7):,:]
-    
-    y_train, y_test = enc[:math.floor(x_dim[0]*0.7),], enc[math.floor(x_dim[0]*0.7):,]
-    
-    #create embedding glove matrix for words
-    emb_mtx = create_glove(tokenizer.word_index, glove_embedding_index)
-    cnn_model = basic_cnn(emb_mtx)
-    
-    #CNN Model training
-    cnn_model.fit(x_train, y_train, validation_split=0.1, epochs = 15)
-    loss, acc = cnn_model.evaluate(x_test, y_test)
-    with open((base_directory + "DL-Model_Accuracy.txt"), 'a') as model:
-             model.write(filename + " Basic-CNN-Model " + str(loss) + " " + str(acc) +"\n")
-    
-    #RNN Attention Model
-    att_model = model_lstm_atten(emb_mtx)
-    att_model.fit(x_train, y_train, validation_split=0.1, epochs = 15)
-    loss, acc = att_model.evaluate(x_test, y_test)
-    with open((base_directory + "DL-Model_Accuracy.txt"), 'a') as model:
-             model.write(filename + " LSTM-Attention " + str(loss) + " " + str(acc) +"\n")
-    
-    
-
-#create glove embeddings from pretrained glove word2vec representations trained on wikipedia
-#download file here: http://nlp.stanford.edu/data/glove.6B.zip
+#create glove embeddings    
 def load_glove_index():
-    EMBEDDING_FILE = base_directory + 'glove.6B.300d.txt'
+    EMBEDDING_FILE = base_directory + '\\glove.6B.300d.txt'
     def get_coefs(word,*arr): return word, np.asarray(arr, dtype='float32')[:300]
     embeddings_index = dict(get_coefs(*o.split(" ")) for o in open(EMBEDDING_FILE, encoding="utf8"))
     return embeddings_index
    
-#Create glove embedding matrix for convolutional operations for each word in our vocab list and glove pretrained words to create a 2-d matrix    
+#Create glove embedding matrix for convolutional operations    
 def create_glove(word_index,embeddings_index):
     emb_mean,emb_std = -0.005838499,0.48782197
     all_embs = np.stack(embeddings_index.values())
@@ -271,22 +226,58 @@ def model_lstm_atten(embedding_matrix):
 
 
     
+
+#Setup Embedding matrix
+glove_embedding_index = load_glove_index()
+
+with open((base_directory + "\\DL-Model_Accuracy.txt"), 'a') as model:
+         model.write("\n project || Model || Loss || Accuracy \n")
+
+#Iterate through datasets applying CNN and Attention models
+for filename in os.listdir(clean_directory):
+    print(filename)
+    df = pd.read_csv(clean_directory + "\\" + filename)
+    data = df.reset_index()[['description', 'storypoint']]
     
+    data.loc[(data.storypoint <= 4), 'storypoints_mod'] = 'low'
+    data.loc[(data.storypoint >13), 'storypoints_mod'] = 'high'
+    data.loc[((data.storypoint <=13) & (data.storypoint > 4)), 'storypoints_mod'] = 'medium'
+    data['sp'] = lb.fit_transform(data['storypoints_mod']).tolist()
+    data = data[['description', 'sp']]
+    enc = [data['sp'][i].index(1) for i in range(df.shape[0])]
+    enc = np.asarray(enc)
     
+    #data setup
+    tokenizer.fit_on_texts(df['description'].astype(str)) #index of words with length vocab size, ordered in length of frequency
+    sequences = tokenizer.texts_to_sequences(df['description'].astype(str))
+    data_sq = pad_sequences(sequences, maxlen=maxlen)
     
+    split = 0.7
+    x_dim = data_sq.shape
+    x_train, x_test = data_sq[:math.floor(x_dim[0]*0.7),:], data_sq[math.floor(x_dim[0]*0.7):,:]
     
+    y_train, y_test = enc[:math.floor(x_dim[0]*0.7),], enc[math.floor(x_dim[0]*0.7):,]
     
+    #create embedding glove matrix for words
+    emb_mtx = create_glove(tokenizer.word_index, glove_embedding_index)
+    cnn_model = basic_cnn(emb_mtx)
     
+    #CNN Model training
+    cnn_model.fit(x_train, y_train, validation_split=0.1, epochs = 15)
+    loss, acc = cnn_model.evaluate(x_test, y_test)
+    with open((base_directory + "\\DL-Model_Accuracy.txt"), 'a') as model:
+             model.write(filename + " Basic-CNN-Model " + str(loss) + " " + str(acc) +"\n")
     
+    #RNN Attention Model
+    att_model = model_lstm_atten(emb_mtx)
+    att_model.fit(x_train, y_train, validation_split=0.1, epochs = 15)
+    loss, acc = att_model.evaluate(x_test, y_test)
+    with open((base_directory + "\\DL-Model_Accuracy.txt"), 'a') as model:
+             model.write(filename + " LSTM-Attention " + str(loss) + " " + str(acc) +"\n")
     
-    
-    
-    
-    
-    
-    
-    
-    
+with open((base_directory + "\\DL-Model_Accuracy.txt"), 'a'):
+    pass
+
     
     
     

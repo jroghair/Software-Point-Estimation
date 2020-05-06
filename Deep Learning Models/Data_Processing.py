@@ -27,9 +27,10 @@ import pandas as pd
 from nltk.corpus import stopwords
 from sklearn.manifold import TSNE
 
-os.chdir('C:\\Users\\jrogh\\OneDrive\\Documents\\665A\\Project')
-directory = 'C:\\Users\\jrogh\\OneDrive\\Documents\\665A\\Project\\Data'
-save_directory = directory = 'C:\\Users\\jrogh\\OneDrive\\Documents\\665A\\Project\\Clean_data'
+cwd = os.getcwd()
+os.chdir(cwd)
+directory = cwd + '\\Data'
+save_directory = cwd + '\\Clean_data'
 
 nltk.download('words')
 nltk.download('stopwords')
