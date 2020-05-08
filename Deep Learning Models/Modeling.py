@@ -76,11 +76,9 @@ def create_glove(word_index,embeddings_index):
         
 #Vanilla Convolutional Neural Network Model    
 def basic_cnn(embedding_matrix):
-    '''
-    idea of how to implement a basic CNN Model to NLP task is from the blog:
-    https://mlwhiz.com/blog/2019/03/09/deeplearning_architectures_text_classification/
-    '''
-    
+    """
+    Based on Yoon Kim's idea of CNN for text: https://arxiv.org/pdf/1408.5882.pdf
+    """
     filter_sizes = [1,2,3,5]
     num_filters = 36
 
@@ -123,23 +121,8 @@ def dot_product(x, kernel):
 #Attention Model 
 class AttentionWithContext(Layer):
     """
-    Attention operation, with a context/query vector, for temporal data.
-    Supports Masking.
     Follows the work of Yang et al. [https://www.cs.cmu.edu/~diyiy/docs/naacl16.pdf]
     "Hierarchical Attention Networks for Document Classification"
-    by using a context vector to assist the attention
-    # Input shape
-        3D tensor with shape: `(samples, steps, features)`.
-    # Output shape
-        2D tensor with shape: `(samples, features)`.
-    How to use:
-    Just put it on top of an RNN Layer (GRU/LSTM/SimpleRNN) with return_sequences=True.
-    The dimensions are inferred based on the output shape of the RNN.
-    Note: The layer has been tested with Keras 2.0.6
-    Example:
-        model.add(LSTM(64, return_sequences=True))
-        model.add(AttentionWithContext())
-        # next add a Dense layer (for classification/regression) or whatever...
     """
 
     def __init__(self,
@@ -279,8 +262,16 @@ with open((base_directory + "\\DL-Model_Accuracy.txt"), 'a'):
     pass
 
     
-    
-    
+'''
+References on implementation for glove embeddings and models from:
+
+#https://github.com/dennybritz/cnn-text-classification-tf
+https://mlwhiz.com/blog/2019/03/09/deeplearning_architectures_text_classification/
+#http://www.wildml.com/2015/11/understanding-convolutional-neural-networks-for-nlp/
+#https://medium.com/@sabber/classifying-yelp-review-comments-using-lstm-and-word-embeddings-part-1-eb2275e4066b
+#https://towardsdatascience.com/how-to-build-a-gated-convolutional-neural-network-gcnn-for-natural-language-processing-nlp-5ba3ee730bfb
+#http://www.wildml.com/2015/12/implementing-a-cnn-for-text-classification-in-tensorflow/
+'''
     
     
     
